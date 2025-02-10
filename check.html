@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra Nhiều Link</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .used {
+            background-color: #f8d7da;
+        }
+        .not-used {
+            background-color: #d4edda;
+        }
+        .add-all-button {
+            background-color: #007bff;
+            color: white;
+            margin-top: 20px;
+        }
+        .add-all-button:hover {
+            background-color: #0056b3;
+        }
+        .add-all-button.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-group">
+            <textarea id="urlInput" placeholder="Nhập nhiều link, mỗi link một dòng"></textarea>
+        </div>
+        <button onclick="checkLinks()">Check Links</button>
+        
+        <button class="add-all-button hidden" onclick="addAllNotUsedLinks()">Thêm tất cả các nguồn chưa sử dụng</button>
+        
+        <div class="result" id="notUsedLinks">
+            <h3>Link chưa có người dùng:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Người kiểm tra</th>
+                        <th>Ngày giờ kiểm tra</th>
+                    </tr>
+                </thead>
+                <tbody id="notUsedLinksTable">
+                    <!-- Các link chưa có người dùng sẽ hiển thị ở đây -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="result" id="usedLinks">
+            <h3>Link đã có người dùng:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Người kiểm tra</th>
+                        <th>Ngày giờ kiểm tra</th>
+                    </tr>
+                </thead>
+                <tbody id="usedLinksTable">
+                    <!-- Các link đã có người dùng sẽ hiển thị ở đây -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let links = [
+            { url: "https://www.twitch.tv/jbfishingwithdad", used: true, username: "user1", timestamp: "2025-02-10 14:30" },
+            { url: "https://www.twitch.tv/mirukucc", used: false, username: "", timestamp: "" },
+            { url: "https://www.twitch.tv/ghostermoma", used: true, username: "user2", timestamp: "2025-02-10 15:00" },
+            { url: "https://www.twitch.tv/deersightings", used: false, username: "", timestamp: "" },
+        ];
+
+        function checkLinks() {
+            const urlInput = document.getElementById('urlInput').value;
+            const usedLinksTable = document.getElementById('usedLinksTable');
+            const notUsedLinksTable = document.getElementById('notUsedLinksTable');
+            const addAllButton = document.querySelector('.add-all-button');
+            const urls = urlInput.split('\n').map(url => url.trim()).filter(url => url);
+
+            usedLinksTable.innerHTML = ''; // Reset nội dung bảng
+            notUsedLinksTable.innerHTML = ''; // Reset nội dung bảng
+            let hasNotUsedLinks = false;  // Đánh dấu xem có link chưa sử dụng
+
+            urls.forEach(urlInput => {
+                const link = links.find(l => l.url === urlInput);
+
+                if (link) {
+                    const row = document.createElement('tr');
+                    if (link.used) {
+                        row.classList.add('used');
+                        row.innerHTML = `
+                            <td><a href="${link.url}" target="_blank">${link.url}</a></td>
+                            <td>${link.username}</td>
+                            <td>${link.timestamp}</td>
+                        `;
+                        usedLinksTable.appendChild(row);
+                    } else {
+                        row.classList.add('not-used');
+                        row.innerHTML = `
+                            <td><a href="${link.url}" target="_blank">${link.url}</a></td>
+                            <td>Chưa có người dùng</td>
+                            <td>Chưa có thời gian</td>
+                        `;
+                        notUsedLinksTable.appendChild(row);
+                        hasNotUsedLinks = true;  // Nếu có link chưa sử dụng
+                    }
+                } else {
+                    const row = document.createElement('tr');
+                    row.classList.add('not-used');
+                    const currentTime = new Date().toLocaleString(); // Lấy thời gian hiện tại
+                    row.innerHTML = `
+                        <td><a href="${urlInput}" target="_blank">${urlInput}</a></td>
+                        <td>Chưa có người dùng</td>
+                        <td>${currentTime}</td>
+                    `;
+                    notUsedLinksTable.appendChild(row);
+
+                    // Thêm link mới vào hệ thống
+                    links.push({ url: urlInput, used: false, username: "", timestamp: currentTime });
+                    hasNotUsedLinks = true;  // Nếu link mới chưa sử dụng
+                }
+            });
+
+            // Hiển thị nút "Thêm tất cả các nguồn chưa sử dụng" nếu có link chưa sử dụng
+            if (hasNotUsedLinks) {
+                addAllButton.classList.remove('hidden');
+            } else {
+                addAllButton.classList.add('hidden');
+            }
+        }
+
+        function addAllNotUsedLinks() {
+            const notUsedLinksTable = document.getElementById('notUsedLinksTable');
+            const urls = document.getElementById('urlInput').value.split('\n').map(url => url.trim()).filter(url => url);
+            const notUsedLinks = [];
+
+            // Lọc các link chưa có người dùng
+            urls.forEach(urlInput => {
+                const link = links.find(l => l.url === urlInput);
+                if (link && !link.used) {
+                    notUsedLinks.push(urlInput);
+                }
+            });
+
+            notUsedLinks.forEach(urlInput => {
+                const row = document.createElement('tr');
+                const currentTime = new Date().toLocaleString(); // Lấy thời gian hiện tại
+                row.classList.add('not-used');
+                row.innerHTML = `
+                    <td><a href="${urlInput}" target="_blank">${urlInput}</a></td>
+                    <td>admin</td>
+                    <td>${currentTime}</td>
+                `;
+                notUsedLinksTable.appendChild(row);
+
+                // Đánh dấu là đã được thêm
+                const link = links.find(l => l.url === urlInput);
+                if (link) {
+                    link.used = true;
+                    link.username = "admin"; // Tên người thêm vào, ví dụ "admin"
+                    link.timestamp = currentTime; // Thời gian thêm vào
+                }
+            });
+        }
+    </script>
+</body>
+</html>
