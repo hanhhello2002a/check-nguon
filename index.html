@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra Link Twitch</title>
+    <style>
+        /* Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        .header {
+            background: #2ecc71;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Container */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 30px auto;
+            text-align: center;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            background-color: #dcdcdc;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: 0.3s;
+        }
+
+        .tab:hover {
+            background-color: #bdc3c7;
+        }
+
+        .tab.active {
+            background-color: #2ecc71;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Input & Button */
+        .input-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #2ecc71;
+            outline: none;
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.5);
+        }
+
+        button {
+            background-color: #2ecc71;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #27ae60;
+        }
+
+        button:active {
+            background-color: #2c3e50;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: white;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+
+        /* Search */
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="profile">
+            <img id="avatar" src="" alt="Avatar">
+            <span id="username">Đang tải...</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">Đăng xuất</button>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('check')">Kiểm tra Link</div>
+            <div class="tab" onclick="showTab('myLinks')">Link đã thêm</div>
+        </div>
+
+        <div id="check" class="tab-content active">
+            <h2>Nhập link Twitch</h2>
+            <div class="input-container">
+                <textarea id="urlInput" placeholder="Nhập link Twitch"></textarea>
+                <button onclick="checkLinks()">Kiểm tra Link</button>
+            </div>
+            <p class="error-msg" id="error-msg"></p>
+            <p class="success-msg" id="success-msg"></p>
+
+            <h3>Link chưa có người dùng:</h3>
+            <table>
+                <thead><tr><th>STT</th><th>Link</th><th>Hành động</th></tr></thead>
+                <tbody id="notUsedLinksTable"></tbody>
+            </table>
+
+            <h3>Nguồn đã dùng:</h3>
+            <table>
+                <thead><tr><th>STT</th><th>Link</th><th>Người sử dụng</th><th>Ngày giờ thêm</th></tr></thead>
+                <tbody id="usedLinksTable"></tbody>
+            </table>
+        </div>
+
+        <div id="myLinks" class="tab-content">
+            <h2>Link bạn đã thêm</h2>
+            <input type="text" id="searchInput" onkeyup="searchLinks()" placeholder="Tìm theo link hoặc ngày...">
+            <table>
+                <thead><tr><th>STT</th><th>Link</th><th>Ngày giờ thêm</th><th>Hành động</th></tr></thead>
+                <tbody id="myLinksTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+        <p>Bạn có chắc muốn xóa link này?</p>
+        <button onclick="confirmDelete()">Xóa</button>
+        <button onclick="closeModal()">Hủy</button>
+    </div>
+</div>
+
+
+    <script>
+        let employees = JSON.parse(localStorage.getItem("employees")) || [];
+        let loggedInKey = localStorage.getItem("loggedInKey");
+        let user = employees.find(emp => emp.key === loggedInKey);
+
+        if (!user) {
+            window.location.href = "login.html"; 
+        } else {
+            document.getElementById("username").innerText = user.name;
+            if (!user.avatar) {
+                let avatarUrl = `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.name)}`;
+                user.avatar = avatarUrl;
+                localStorage.setItem("employees", JSON.stringify(employees));
+            }
+            document.getElementById("avatar").src = user.avatar;
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            if (tabId === 'myLinks') {
+                loadMyLinks();
+            }
+        }
+
+        function checkLinks() {
+    const urlInput = document.getElementById('urlInput').value;
+    const notUsedLinksTable = document.getElementById('notUsedLinksTable');
+    const usedLinksTable = document.getElementById('usedLinksTable');
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
+    const addAllButtonContainer = document.getElementById('addAllButtonContainer');
+
+    const urls = urlInput.split('\n').map(url => url.trim()).filter(url => url);
+
+    if (urls.some(url => !isValidUrl(url))) {
+        errorMsg.innerText = 'Một hoặc nhiều link không hợp lệ.';
+        return;
+    }
+
+    errorMsg.innerText = ''; // Clear error
+    successMsg.innerText = 'Đang kiểm tra link...';
+
+    let links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
+
+    notUsedLinksTable.innerHTML = '';
+    usedLinksTable.innerHTML = '';
+
+    let notUsedLinksExist = false; // Biến kiểm tra nếu có link chưa dùng
+
+    let usedLinksCount = 1; // Số thứ tự bắt đầu cho bảng Link đã dùng
+    let notUsedLinksCount = 1; // Số thứ tự bắt đầu cho bảng Link chưa dùng
+
+    urls.forEach(url => {
+        const existingLink = links.find(link => link.url === url);
+
+        if (existingLink) {
+            usedLinksTable.innerHTML += `<tr><td>${usedLinksCount}</td><td>${url}</td><td>${existingLink.user}</td><td>${existingLink.timestamp}</td></tr>`;
+            usedLinksCount++; // Tăng số thứ tự cho bảng đã dùng
+        } else {
+            notUsedLinksExist = true; // Có ít nhất một link chưa dùng
+            notUsedLinksTable.innerHTML += `<tr><td>${notUsedLinksCount}</td><td>${url}</td><td><button onclick="addLink('${url}')">Thêm</button></td></tr>`;
+            notUsedLinksCount++; // Tăng số thứ tự cho bảng chưa dùng
+        }
+    });
+
+    // Hiển thị nút "Thêm tất cả" nếu có link chưa dùng
+    if (notUsedLinksExist) {
+        addAllButtonContainer.innerHTML = `<button onclick="addAllLinks()">Thêm tất cả</button>`;
+    } else {
+        addAllButtonContainer.innerHTML = ''; // Ẩn nút nếu không có link chưa dùng
+    }
+
+    successMsg.innerText = '';
+}
+
+function addLink(url) {
+    let links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
+    const timestamp = new Date().toLocaleString();
+
+    // Kiểm tra nếu link chưa tồn tại trong danh sách
+    const existingLink = links.find(link => link.url === url);
+    if (!existingLink) {
+        const newLink = {
+            url,
+            user: user.name,
+            timestamp
+        };
+        links.push(newLink); // Thêm link mới vào danh sách
+        localStorage.setItem("twitchLinks", JSON.stringify(links)); // Lưu lại vào localStorage
+    }
+
+    // Cập nhật lại bảng sau khi thêm link
+    checkLinks();
+}
+
+
+function addAllLinks() {
+    const urlInput = document.getElementById('urlInput').value;
+    const urls = urlInput.split('\n').map(url => url.trim()).filter(url => url);
+
+    let links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
+    const timestamp = new Date().toLocaleString();
+
+    urls.forEach(url => {
+        const existingLink = links.find(link => link.url === url);
+        if (!existingLink) {
+            const newLink = {
+                url,
+                user: user.name,
+                timestamp
+            };
+            links.push(newLink);
+        }
+    });
+
+    localStorage.setItem("twitchLinks", JSON.stringify(links));
+    checkLinks(); // Cập nhật lại bảng sau khi thêm tất cả link
+}
+
+
+        function isValidUrl(url) {
+            const regex = /^(https?:\/\/)?(www\.)?twitch\.tv\/[a-zA-Z0-9_]+$/;
+            return regex.test(url);
+        }
+
+        function loadMyLinks() {
+    const myLinksTable = document.getElementById("myLinksTable");
+    const links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
+    const userLinks = links.filter(link => link.user === user.name);
+
+    myLinksTable.innerHTML = '';
+    userLinks.forEach((link, index) => {
+        const number = index + 1; // Số thứ tự
+        myLinksTable.innerHTML += `<tr><td>${number}</td><td>${link.url}</td><td>${link.timestamp}</td><td><button onclick="confirmDeleteLink('${link.url}')">Xóa</button></td></tr>`;
+    });
+}
+
+
+        function searchLinks() {
+            const query = document.getElementById("searchInput").value.toLowerCase();
+            const myLinksTable = document.getElementById("myLinksTable");
+            const rows = myLinksTable.getElementsByTagName("tr");
+
+            for (let row of rows) {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            }
+        }
+
+        function confirmDeleteLink(url) {
+            const modal = document.getElementById("deleteModal");
+            const modalKeyInput = document.getElementById("modalKeyInput");
+
+            modal.style.display = 'flex';
+
+            window.confirmDelete = function () {
+                const links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
+                const index = links.findIndex(link => link.url === url);
+
+                if (index !== -1) {
+                    links.splice(index, 1);
+                    localStorage.setItem("twitchLinks", JSON.stringify(links));
+                    loadMyLinks();
+                    closeModal();
+                }
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("deleteModal").style.display = 'none';
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInKey");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
