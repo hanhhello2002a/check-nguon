@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Đăng nhập</h2>
+        <input type="text" id="keyInput" placeholder="Nhập key của bạn">
+        <button onclick="login()">Đăng nhập</button>
+        <p id="errorMsg" style="color: red;"></p>
+    </div>
+
+    <script>
+        // Kiểm tra nếu chưa có dữ liệu, chỉ thêm 1 lần duy nhất
+        if (!localStorage.getItem("employees")) {
+            let employees = [
+                { name: "Nguyễn Văn A", key: "ABC123", avatar: "" },
+                { name: "Trần Thị B", key: "XYZ789", avatar: "" }
+            ];
+            localStorage.setItem("employees", JSON.stringify(employees));
+        }
+
+        function login() {
+            let key = document.getElementById("keyInput").value.trim();
+            let storedEmployees = JSON.parse(localStorage.getItem("employees")) || [];
+            let user = storedEmployees.find(emp => emp.key === key);
+
+            if (user) {
+                localStorage.setItem("loggedInKey", key);
+                window.location.href = "index.html";
+            } else {
+                document.getElementById("errorMsg").innerText = "Key không hợp lệ!";
+            }
+        }
+    </script>
+</body>
+</html>
