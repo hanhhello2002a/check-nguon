@@ -3,420 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiểm tra Link Twitch</title>
-    <style>
-        /* Reset */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-        body {
-            background-color: #f4f4f4;
-            color: #333;
-            padding-bottom: 50px;
-        }
-
-        /* Header */
-        .header {
-            background: #2ecc71;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-        }
-
-        .profile img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 10px;
-            border: 2px solid white;
-        }
-
-        .logout-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .logout-btn:hover {
-            background-color: #c0392b;
-        }
-
-        /* Container */
-        .container {
-            width: 90%;
-            max-width: 800px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin: 30px auto;
-            text-align: center;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            background-color: #dcdcdc;
-            border-radius: 5px;
-            margin: 0 5px;
-            transition: 0.3s;
-        }
-
-        .tab:hover {
-            background-color: #bdc3c7;
-        }
-
-        .tab.active {
-            background-color: #2ecc71;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Tab content */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Input & Button */
-        .input-container {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-
-        textarea:focus {
-            border-color: #2ecc71;
-            outline: none;
-            box-shadow: 0 0 8px rgba(46, 204, 113, 0.5);
-        }
-
-        button {
-            background-color: #2ecc71;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 5px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background-color: #27ae60;
-        }
-
-        button:active {
-            background-color: #2c3e50;
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            background-color: white;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #2ecc71;
-            color: white;
-        }
-
-        tr:hover {
-            background-color: #f2f2f2;
-        }
-
-        /* Search */
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="profile">
-            <img id="avatar" src="" alt="Avatar">
-            <span id="username">Đang tải...</span>
-        </div>
-        <button class="logout-btn" onclick="logout()">Đăng xuất</button>
-    </div>
-
-    <div class="container">
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('check')">Kiểm tra Link</div>
-            <div class="tab" onclick="showTab('myLinks')">Link đã thêm</div>
-        </div>
-
-        <div id="check" class="tab-content active">
-            <h2>Nhập link Twitch</h2>
-            <div class="input-container">
-                <textarea id="urlInput" placeholder="Nhập link Twitch"></textarea>
-                <button onclick="checkLinks()">Kiểm tra Link</button>
-            </div>
-            <p class="error-msg" id="error-msg"></p>
-            <p class="success-msg" id="success-msg"></p>
-
-            <h3>Link chưa có người dùng:</h3>
-            <table>
-                <thead><tr><th>STT</th><th>Link</th><th>Hành động</th></tr></thead>
-                <tbody id="notUsedLinksTable"></tbody>
-            </table>
-
-            <h3>Nguồn đã dùng:</h3>
-            <table>
-                <thead><tr><th>STT</th><th>Link</th><th>Người sử dụng</th><th>Ngày giờ thêm</th></tr></thead>
-                <tbody id="usedLinksTable"></tbody>
-            </table>
-        </div>
-
-        <div id="myLinks" class="tab-content">
-            <h2>Link bạn đã thêm</h2>
-            <input type="text" id="searchInput" onkeyup="searchLinks()" placeholder="Tìm theo link hoặc ngày...">
-            <table>
-                <thead><tr><th>STT</th><th>Link</th><th>Ngày giờ thêm</th><th>Hành động</th></tr></thead>
-                <tbody id="myLinksTable"></tbody>
-            </table>
-        </div>
-    </div>
-
-<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
-    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-        <p>Bạn có chắc muốn xóa link này?</p>
-        <button onclick="confirmDelete()">Xóa</button>
-        <button onclick="closeModal()">Hủy</button>
-    </div>
-</div>
-
-
+    <title>Hệ thống đang bảo trì | Vui lòng quay lại sau</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter từ Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
-        let employees = JSON.parse(localStorage.getItem("employees")) || [];
-        let loggedInKey = localStorage.getItem("loggedInKey");
-        let user = employees.find(emp => emp.key === loggedInKey);
-
-        if (!user) {
-            window.location.href = "login.html"; 
-        } else {
-            document.getElementById("username").innerText = user.name;
-            if (!user.avatar) {
-                let avatarUrl = `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(user.name)}`;
-                user.avatar = avatarUrl;
-                localStorage.setItem("employees", JSON.stringify(employees));
-            }
-            document.getElementById("avatar").src = user.avatar;
-        }
-
-        function showTab(tabId) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-            
-            if (tabId === 'myLinks') {
-                loadMyLinks();
-            }
-        }
-
-        function checkLinks() {
-    const urlInput = document.getElementById('urlInput').value;
-    const notUsedLinksTable = document.getElementById('notUsedLinksTable');
-    const usedLinksTable = document.getElementById('usedLinksTable');
-    const errorMsg = document.getElementById('error-msg');
-    const successMsg = document.getElementById('success-msg');
-    const addAllButtonContainer = document.getElementById('addAllButtonContainer');
-
-    const urls = urlInput.split('\n').map(url => url.trim()).filter(url => url);
-
-    if (urls.some(url => !isValidUrl(url))) {
-        errorMsg.innerText = 'Một hoặc nhiều link không hợp lệ.';
-        return;
-    }
-
-    errorMsg.innerText = ''; // Clear error
-    successMsg.innerText = 'Đang kiểm tra link...';
-
-    let links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
-
-    notUsedLinksTable.innerHTML = '';
-    usedLinksTable.innerHTML = '';
-
-    let notUsedLinksExist = false; // Biến kiểm tra nếu có link chưa dùng
-
-    let usedLinksCount = 1; // Số thứ tự bắt đầu cho bảng Link đã dùng
-    let notUsedLinksCount = 1; // Số thứ tự bắt đầu cho bảng Link chưa dùng
-
-    urls.forEach(url => {
-        const existingLink = links.find(link => link.url === url);
-
-        if (existingLink) {
-            usedLinksTable.innerHTML += `<tr><td>${usedLinksCount}</td><td>${url}</td><td>${existingLink.user}</td><td>${existingLink.timestamp}</td></tr>`;
-            usedLinksCount++; // Tăng số thứ tự cho bảng đã dùng
-        } else {
-            notUsedLinksExist = true; // Có ít nhất một link chưa dùng
-            notUsedLinksTable.innerHTML += `<tr><td>${notUsedLinksCount}</td><td>${url}</td><td><button onclick="addLink('${url}')">Thêm</button></td></tr>`;
-            notUsedLinksCount++; // Tăng số thứ tự cho bảng chưa dùng
-        }
-    });
-
-    // Hiển thị nút "Thêm tất cả" nếu có link chưa dùng
-    if (notUsedLinksExist) {
-        addAllButtonContainer.innerHTML = `<button onclick="addAllLinks()">Thêm tất cả</button>`;
-    } else {
-        addAllButtonContainer.innerHTML = ''; // Ẩn nút nếu không có link chưa dùng
-    }
-
-    successMsg.innerText = '';
-}
-
-function addLink(url) {
-    let links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
-    const timestamp = new Date().toLocaleString();
-
-    // Kiểm tra nếu link chưa tồn tại trong danh sách
-    const existingLink = links.find(link => link.url === url);
-    if (!existingLink) {
-        const newLink = {
-            url,
-            user: user.name,
-            timestamp
-        };
-        links.push(newLink); // Thêm link mới vào danh sách
-        localStorage.setItem("twitchLinks", JSON.stringify(links)); // Lưu lại vào localStorage
-    }
-
-    // Cập nhật lại bảng sau khi thêm link
-    checkLinks();
-}
-
-
-function addAllLinks() {
-    const urlInput = document.getElementById('urlInput').value;
-    const urls = urlInput.split('\n').map(url => url.trim()).filter(url => url);
-
-    let links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
-    const timestamp = new Date().toLocaleString();
-
-    urls.forEach(url => {
-        const existingLink = links.find(link => link.url === url);
-        if (!existingLink) {
-            const newLink = {
-                url,
-                user: user.name,
-                timestamp
-            };
-            links.push(newLink);
-        }
-    });
-
-    localStorage.setItem("twitchLinks", JSON.stringify(links));
-    checkLinks(); // Cập nhật lại bảng sau khi thêm tất cả link
-}
-
-
-        function isValidUrl(url) {
-            const regex = /^(https?:\/\/)?(www\.)?twitch\.tv\/[a-zA-Z0-9_]+$/;
-            return regex.test(url);
-        }
-
-        function loadMyLinks() {
-    const myLinksTable = document.getElementById("myLinksTable");
-    const links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
-    const userLinks = links.filter(link => link.user === user.name);
-
-    myLinksTable.innerHTML = '';
-    userLinks.forEach((link, index) => {
-        const number = index + 1; // Số thứ tự
-        myLinksTable.innerHTML += `<tr><td>${number}</td><td>${link.url}</td><td>${link.timestamp}</td><td><button onclick="confirmDeleteLink('${link.url}')">Xóa</button></td></tr>`;
-    });
-}
-
-
-        function searchLinks() {
-            const query = document.getElementById("searchInput").value.toLowerCase();
-            const myLinksTable = document.getElementById("myLinksTable");
-            const rows = myLinksTable.getElementsByTagName("tr");
-
-            for (let row of rows) {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
-            }
-        }
-
-        function confirmDeleteLink(url) {
-            const modal = document.getElementById("deleteModal");
-            const modalKeyInput = document.getElementById("modalKeyInput");
-
-            modal.style.display = 'flex';
-
-            window.confirmDelete = function () {
-                const links = JSON.parse(localStorage.getItem("twitchLinks")) || [];
-                const index = links.findIndex(link => link.url === url);
-
-                if (index !== -1) {
-                    links.splice(index, 1);
-                    localStorage.setItem("twitchLinks", JSON.stringify(links));
-                    loadMyLinks();
-                    closeModal();
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'spin-reverse-slow': 'spin-reverse 10s linear infinite',
+                        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        'spin-reverse': {
+                            '0%': { transform: 'rotate(360deg)' },
+                            '100%': { transform: 'rotate(0deg)' },
+                        }
+                    }
                 }
             }
         }
+    </script>
+    <style>
+        /* Hiệu ứng sọc chéo chuyển động nhẹ cho thanh tiến trình */
+        @keyframes progress-stripes {
+            0% { background-position: 1rem 0; }
+            100% { background-position: 0 0; }
+        }
+        .progress-bar-striped {
+            background-image: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.15) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.15) 50%,
+                rgba(255, 255, 255, 0.15) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 1rem 1rem;
+            animation: progress-stripes 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-blue-100 selection:text-blue-700 relative overflow-x-hidden">
 
-        function closeModal() {
-            document.getElementById("deleteModal").style.display = 'none';
+    <!-- Họa tiết nền trang trí tối giản -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-100/60 blur-3xl"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-indigo-100/60 blur-3xl"></div>
+    </div>
+
+    <!-- Container chính -->
+    <main class="w-full max-w-xl bg-white/90 backdrop-blur-md rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 p-6 sm:p-10 text-center transition-all">
+        
+        <!-- Khu vực biểu tượng bánh răng chuyển động -->
+        <div class="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+            <!-- Vòng tròn nền phát sáng nhẹ -->
+            <div class="absolute inset-0 bg-blue-50 rounded-full animate-pulse-subtle"></div>
+            
+            <!-- Bánh răng lớn (Xoay thuận) -->
+            <svg class="w-14 h-14 text-blue-600 animate-spin-slow relative z-10 -ml-3 -mt-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+
+            <!-- Bánh răng nhỏ (Xoay ngược) -->
+            <svg class="w-9 h-9 text-indigo-500 animate-spin-reverse-slow relative z-10 -ml-2 mt-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        </div>
+
+        <!-- Nhãn trạng thái -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-700 text-xs font-semibold tracking-wide uppercase mb-4">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+            <span>Nâng cấp định kỳ</span>
+        </div>
+
+        <!-- Tiêu đề nổi bật -->
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-3">
+            Hệ thống đang bảo trì
+        </h1>
+
+        <!-- Mô tả ngắn gọn -->
+        <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-md mx-auto mb-8">
+            Chúng tôi đang tiến hành nâng cấp hạ tầng kỹ thuật và tối ưu hóa hiệu năng để mang lại trải nghiệm mượt mà, ổn định hơn cho bạn. Xin lỗi vì sự bất tiện này!
+        </p>
+
+        <!-- Thanh tiến trình (Progress Bar) -->
+        <div class="mb-8 text-left bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Tiến độ hoàn thành</span>
+                <span id="progress-text" class="text-sm font-bold text-blue-600">75%</span>
+            </div>
+            <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full progress-bar-striped transition-all duration-700 ease-out" style="width: 75%;"></div>
+            </div>
+            <p id="status-step" class="text-xs text-slate-500 mt-2 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>Đang đồng bộ dữ liệu và kiểm tra bảo mật hệ thống...</span>
+            </p>
+        </div>
+
+        <!-- Đồng hồ đếm ngược -->
+        <div class="mb-8">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                Thời gian dự kiến hoàn tất
+            </p>
+            <div id="countdown-container" class="grid grid-cols-4 gap-2 sm:gap-4 max-w-sm mx-auto">
+                <div class="bg-slate-900 text-white rounded-2xl p-3 sm:p-4 shadow-sm">
+                    <div id="cd-days" class="text-xl sm:text-2xl font-bold tabular-nums">00</div>
+                    <div class="text-[11px] text-slate-400 font-medium mt-0.5">Ngày</div>
+                </div>
+                <div class="bg-slate-900 text-white rounded-2xl p-3 sm:p-4 shadow-sm">
+                    <div id="cd-hours" class="text-xl sm:text-2xl font-bold tabular-nums">02</div>
+                    <div class="text-[11px] text-slate-400 font-medium mt-0.5">Giờ</div>
+                </div>
+                <div class="bg-slate-900 text-white rounded-2xl p-3 sm:p-4 shadow-sm">
+                    <div id="cd-minutes" class="text-xl sm:text-2xl font-bold tabular-nums">30</div>
+                    <div class="text-[11px] text-slate-400 font-medium mt-0.5">Phút</div>
+                </div>
+                <div class="bg-slate-900 text-white rounded-2xl p-3 sm:p-4 shadow-sm">
+                    <div id="cd-seconds" class="text-xl sm:text-2xl font-bold tabular-nums text-blue-400">00</div>
+                    <div class="text-[11px] text-slate-400 font-medium mt-0.5">Giây</div>
+                </div>
+            </div>
+            <!-- Thông báo hiển thị khi hết giờ đếm ngược -->
+            <div id="countdown-finished" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl p-4 text-sm font-medium">
+                Quá trình bảo trì đã hoàn tất! Vui lòng nhấn nút tải lại trang bên dưới.
+            </div>
+        </div>
+
+        <!-- Nút tải lại trang -->
+        <div class="mb-8">
+            <button id="reload-btn" onclick="handleReload()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-semibold text-sm shadow-lg shadow-blue-600/25 transition-all cursor-pointer">
+                <svg id="reload-icon" class="w-4 h-4 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Kiểm tra & Tải lại trang</span>
+            </button>
+        </div>
+
+        <!-- Đường kẻ phân cách -->
+        <div class="border-t border-slate-100 pt-6">
+            <p class="text-xs text-slate-500 mb-3">Cần hỗ trợ khẩn cấp? Liên hệ đội ngũ kỹ thuật của chúng tôi:</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm font-medium text-slate-700">
+                <!-- Email -->
+                <a href="mailto:hotro@tenmiencuaban.vn" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-blue-600 transition-colors">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>hotro@tenmiencuaban.vn</span>
+                </a>
+                
+                <!-- Hotline -->
+                <a href="tel:19001234" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 text-slate-700 hover:text-blue-600 transition-colors">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span>1900 1234 (24/7)</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer bản quyền nhỏ gọn -->
+    <footer class="mt-6 text-center text-xs text-slate-400">
+        &copy; <span id="current-year"></span> Hệ thống dịch vụ trực tuyến. Bảo lưu mọi quyền.
+    </footer>
+
+    <!-- ==========================================
+         CẤU HÌNH JAVASCRIPT (DỄ DÀNG TÙY CHỈNH)
+         ========================================== -->
+    <script>
+        /**
+         * CẤU HÌNH BẢO TRÌ:
+         * Bạn có thể chỉnh sửa các thông số bên dưới theo nhu cầu thực tế.
+         */
+        const MAINTENANCE_CONFIG = {
+            // Cách 1: Đặt mốc thời gian kết thúc cố định (Định dạng ISO: 'YYYY-MM-DDTHH:mm:ss')
+            // Ví dụ: '2026-11-18T12:00:00'
+            // Nếu để null, hệ thống sẽ dùng Cách 2 (đếm ngược theo số phút bên dưới).
+            targetEndTime: null,
+
+            // Cách 2: Đếm ngược bao nhiêu phút tính từ lúc người dùng mở trang (Mặc định: 150 phút = 2 giờ 30 phút)
+            fallbackMinutes: 150,
+
+            // Phần trăm tiến độ hoàn thành hiển thị trên thanh Progress Bar (0 - 100)
+            progressPercent: 75,
+
+            // Mô tả bước kỹ thuật hiện tại
+            currentStepText: "Đang đồng bộ dữ liệu và kiểm tra bảo mật hệ thống..."
+        };
+
+        // Cập nhật năm hiện tại ở footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Khởi tạo thanh tiến trình từ cấu hình
+        function initProgress() {
+            const clampedPercent = Math.max(0, Math.min(100, MAINTENANCE_CONFIG.progressPercent));
+            document.getElementById('progress-bar').style.width = clampedPercent + '%';
+            document.getElementById('progress-text').textContent = clampedPercent + '%';
+            document.querySelector('#status-step span').textContent = MAINTENANCE_CONFIG.currentStepText;
         }
 
-        function logout() {
-            localStorage.removeItem("loggedInKey");
-            window.location.href = "login.html";
+        // Khởi tạo đồng hồ đếm ngược
+        function initCountdown() {
+            let endTime;
+
+            if (MAINTENANCE_CONFIG.targetEndTime) {
+                endTime = new Date(MAINTENANCE_CONFIG.targetEndTime).getTime();
+            } else {
+                // Lưu mốc thời gian vào sessionStorage để khi F5 không bị reset lại từ đầu
+                const savedEndTime = sessionStorage.getItem('maintenance_end_time');
+                if (savedEndTime && parseInt(savedEndTime, 10) > Date.now()) {
+                    endTime = parseInt(savedEndTime, 10);
+                } else {
+                    endTime = Date.now() + MAINTENANCE_CONFIG.fallbackMinutes * 60 * 1000;
+                    sessionStorage.setItem('maintenance_end_time', endTime.toString());
+                }
+            }
+
+            const elDays = document.getElementById('cd-days');
+            const elHours = document.getElementById('cd-hours');
+            const elMinutes = document.getElementById('cd-minutes');
+            const elSeconds = document.getElementById('cd-seconds');
+            const container = document.getElementById('countdown-container');
+            const finishedBanner = document.getElementById('countdown-finished');
+
+            function formatNumber(num) {
+                return num < 10 ? '0' + num : num;
+            }
+
+            function updateTimer() {
+                const now = Date.now();
+                const distance = endTime - now;
+
+                if (distance <= 0) {
+                    clearInterval(timerInterval);
+                    container.classList.add('hidden');
+                    finishedBanner.classList.remove('hidden');
+                    document.getElementById('progress-bar').style.width = '100%';
+                    document.getElementById('progress-text').textContent = '100%';
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                elDays.textContent = formatNumber(days);
+                elHours.textContent = formatNumber(hours);
+                elMinutes.textContent = formatNumber(minutes);
+                elSeconds.textContent = formatNumber(seconds);
+            }
+
+            updateTimer(); // Chạy ngay lần đầu để tránh độ trễ 1 giây
+            const timerInterval = setInterval(updateTimer, 1000);
         }
+
+        // Xử lý nút tải lại trang với hiệu ứng xoay icon mượt mà
+        function handleReload() {
+            const icon = document.getElementById('reload-icon');
+            const btnText = document.querySelector('#reload-btn span');
+            icon.classList.add('animate-spin');
+            btnText.textContent = 'Đang kiểm tra kết nối...';
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+
+        // Chạy khởi tạo khi tải xong DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            initProgress();
+            initCountdown();
+        });
     </script>
 </body>
 </html>
